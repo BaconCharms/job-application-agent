@@ -1,4 +1,4 @@
-from agent import ask_agent
+from agent.agent import ask_agent
 
 
 def analyze_resume(resume, job_description):
