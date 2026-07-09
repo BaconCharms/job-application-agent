@@ -1,6 +1,12 @@
 from resume_analyzer import analyze_resume
 from application_generator import generate_application
+from tracker.application_tracker import add_application
+from job_parser import extract_job_info
+from job_parser_utils import parse_job_info
 
+
+
+# Load Resume
 
 with open(
     "resume/resume.txt",
@@ -12,6 +18,8 @@ with open(
 
 
 
+# Load Job Description
+
 with open(
     "jobs/sample_job.txt",
     "r",
@@ -22,7 +30,23 @@ with open(
 
 
 
-# Resume Analysis
+# Extract Job Information
+
+job_response = extract_job_info(
+    job_description
+)
+
+job_info = parse_job_info(
+    job_response
+)
+
+
+print("\nJob Information:\n")
+print(job_info)
+
+
+
+# Analyze Resume Against Job
 
 analysis = analyze_resume(
     resume,
@@ -32,6 +56,7 @@ analysis = analyze_resume(
 
 print("\nResume Analysis:\n")
 print(analysis)
+
 
 
 with open(
@@ -44,7 +69,7 @@ with open(
 
 
 
-# Application Generation
+# Generate Application Package
 
 application = generate_application(
     resume,
@@ -52,8 +77,9 @@ application = generate_application(
 )
 
 
-print("\n\nApplication Package:\n")
+print("\nApplication Package:\n")
 print(application)
+
 
 
 with open(
@@ -63,3 +89,14 @@ with open(
 ) as file:
 
     file.write(application)
+
+
+
+# Save Application To Tracker
+
+add_application(
+    job_info["company"],
+    job_info["role"],
+    75,
+    "Generated resume analysis and application package"
+)
