@@ -1,12 +1,15 @@
 from resume_analyzer import analyze_resume
 from application_generator import generate_application
-from tracker.application_tracker import add_application
+from job_loader import load_jobs
 from job_parser import extract_job_info
 from job_parser_utils import parse_job_info
+from tracker.application_tracker import add_application
 
 
 
+# -------------------------
 # Load Resume
+# -------------------------
 
 with open(
     "resume/resume.txt",
@@ -18,85 +21,125 @@ with open(
 
 
 
-# Load Job Description
+# -------------------------
+# Load Jobs
+# -------------------------
 
-with open(
-    "jobs/sample_job.txt",
-    "r",
-    encoding="utf-8"
-) as file:
-
-    job_description = file.read()
+jobs = load_jobs()
 
 
-
-# Extract Job Information
-
-job_response = extract_job_info(
-    job_description
-)
-
-job_info = parse_job_info(
-    job_response
-)
+print("\nJobs Found:")
+print(len(jobs))
 
 
-print("\nJob Information:\n")
-print(job_info)
+print("\n==============================")
+print("JOB ANALYSIS RESULTS")
+print("==============================\n")
 
 
 
-# Analyze Resume Against Job
-
-analysis = analyze_resume(
-    resume,
-    job_description
-)
-
-
-print("\nResume Analysis:\n")
-print(analysis)
+results = []
 
 
 
-with open(
-    "output/resume_analysis.txt",
-    "w",
-    encoding="utf-8"
-) as file:
+# -------------------------
+# Process Jobs
+# -------------------------
 
-    file.write(analysis)
+for job in jobs:
 
-
-
-# Generate Application Package
-
-application = generate_application(
-    resume,
-    job_description
-)
+    print("\nProcessing:")
+    print(job["filename"])
 
 
-print("\nApplication Package:\n")
-print(application)
+    job_description = job["description"]
 
 
 
-with open(
-    "output/application_package.txt",
-    "w",
-    encoding="utf-8"
-) as file:
+    # -------------------------
+    # Parse Job Information
+    # -------------------------
 
-    file.write(application)
+    job_response = extract_job_info(
+        job_description
+    )
+
+
+    job_info = parse_job_info(
+        job_response
+    )
+
+
+    print("\nJob Information:")
+    print(job_info)
 
 
 
-# Save Application To Tracker
+    # -------------------------
+    # Resume Analysis
+    # -------------------------
 
-add_application(
-    job_info["company"],
-    job_info["role"],
-    75,
-    "Generated resume analysis and application package"
+    analysis = analyze_resume(
+        resume,
+        job_description
+    )
+
+
+    print("\nResume Analysis:")
+    print(analysis)
+
+
+
+    # -------------------------
+    # Generate Application
+    # -------------------------
+
+    package = generate_application(
+        resume,
+        job_description
+    )
+
+
+    print("\nApplication Package Generated")
+
+
+
+    # -------------------------
+    # Save Result
+    # -------------------------
+
+    results.append(
+        {
+            "job": job_info,
+            "analysis": analysis
+        }
+    )
+
+
+
+    # -------------------------
+    # Track Application
+    # -------------------------
+
+    add_application(
+        company=job_info["company"],
+        role=job_info["role"],
+        status="Review",
+        match_score="Pending",
+        notes="Generated application package"
+    )
+
+
+
+# -------------------------
+# Complete
+# -------------------------
+
+print("\n==============================")
+print("PROCESS COMPLETE")
+print("==============================")
+
+
+print(
+    f"\nProcessed {len(results)} jobs."
 )

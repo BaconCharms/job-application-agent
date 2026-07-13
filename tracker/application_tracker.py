@@ -1,31 +1,30 @@
 import csv
+import os
 from datetime import date
 
 
 APPLICATION_FILE = "data/applications.csv"
 
 
-
 def application_exists(company, role):
 
-    try:
-        with open(
-            APPLICATION_FILE,
-            "r",
-            encoding="utf-8"
-        ) as file:
-
-            reader = csv.DictReader(file)
-
-            for row in reader:
-                if (
-                    row["company"] == company
-                    and row["role"] == role
-                ):
-                    return True
-
-    except FileNotFoundError:
+    if not os.path.exists(APPLICATION_FILE):
         return False
+
+    with open(
+        APPLICATION_FILE,
+        "r",
+        encoding="utf-8"
+    ) as file:
+
+        reader = csv.DictReader(file)
+
+        for row in reader:
+            if (
+                row["company"] == company
+                and row["role"] == role
+            ):
+                return True
 
     return False
 
@@ -34,6 +33,7 @@ def application_exists(company, role):
 def add_application(
     company,
     role,
+    status,
     match_score,
     notes=""
 ):
@@ -41,6 +41,9 @@ def add_application(
     if application_exists(company, role):
         print("Application already exists in tracker.")
         return
+
+
+    file_exists = os.path.exists(APPLICATION_FILE)
 
 
     with open(
@@ -52,14 +55,27 @@ def add_application(
 
         writer = csv.writer(file)
 
+
+        if not file_exists:
+            writer.writerow([
+                "company",
+                "role",
+                "date_applied",
+                "status",
+                "match_score",
+                "notes"
+            ])
+
+
         writer.writerow([
             company,
             role,
             date.today(),
-            "Applied",
+            status,
             match_score,
             notes
         ])
+
 
     print("Application added to tracker.")
 
@@ -67,13 +83,18 @@ def add_application(
 
 def view_applications():
 
+    if not os.path.exists(APPLICATION_FILE):
+        print("No applications found.")
+        return
+
+
     with open(
         APPLICATION_FILE,
         "r",
         encoding="utf-8"
     ) as file:
 
-        reader = csv.reader(file)
+        reader = csv.DictReader(file)
 
         for row in reader:
             print(row)
@@ -83,6 +104,11 @@ def view_applications():
 def get_applications():
 
     applications = []
+
+
+    if not os.path.exists(APPLICATION_FILE):
+        return applications
+
 
     with open(
         APPLICATION_FILE,
@@ -94,5 +120,6 @@ def get_applications():
 
         for row in reader:
             applications.append(row)
+
 
     return applications
