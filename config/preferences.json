@@ -1,0 +1,22 @@
+{
+    "locations": [
+        "California",
+        "Remote"
+    ],
+
+    "minimum_match_score": 70,
+
+    "preferred_roles": [
+        "Accounting Intern",
+        "Finance Intern",
+        "Corporate Accounting Intern",
+        "Business Analyst Intern",
+        "Business Development Intern"
+    ],
+
+    "excluded_companies": [
+        ""
+    ],
+
+    "requires_approval": true
+}

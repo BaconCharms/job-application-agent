@@ -21,8 +21,8 @@ def application_exists(company, role):
 
         for row in reader:
             if (
-                row["company"] == company
-                and row["role"] == role
+                 row["company"].lower().strip() == company.lower().strip()
+                and row["role"].lower().strip() == role.lower().strip()
             ):
                 return True
 

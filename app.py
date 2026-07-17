@@ -4,12 +4,13 @@ from job_loader import load_jobs
 from job_parser import extract_job_info
 from job_parser_utils import parse_job_info
 from tracker.application_tracker import add_application
+from job_qualifier import qualify_job
 
 
 
-# -------------------------
+# ==============================
 # Load Resume
-# -------------------------
+# ==============================
 
 with open(
     "resume/resume.txt",
@@ -21,9 +22,9 @@ with open(
 
 
 
-# -------------------------
+# ==============================
 # Load Jobs
-# -------------------------
+# ==============================
 
 jobs = load_jobs()
 
@@ -42,11 +43,12 @@ results = []
 
 
 
-# -------------------------
-# Process Jobs
-# -------------------------
+# ==============================
+# Process Each Job
+# ==============================
 
 for job in jobs:
+
 
     print("\nProcessing:")
     print(job["filename"])
@@ -56,9 +58,9 @@ for job in jobs:
 
 
 
-    # -------------------------
-    # Parse Job Information
-    # -------------------------
+    # ------------------------------
+    # Extract Job Information
+    # ------------------------------
 
     job_response = extract_job_info(
         job_description
@@ -75,9 +77,9 @@ for job in jobs:
 
 
 
-    # -------------------------
-    # Resume Analysis
-    # -------------------------
+    # ------------------------------
+    # Analyze Resume Match
+    # ------------------------------
 
     analysis = analyze_resume(
         resume,
@@ -90,9 +92,38 @@ for job in jobs:
 
 
 
-    # -------------------------
-    # Generate Application
-    # -------------------------
+    # ------------------------------
+    # Job Qualification
+    # ------------------------------
+
+    decision = qualify_job(
+        job_info,
+        analysis
+    )
+
+
+    print("\nJob Qualification:")
+    print(decision)
+
+
+
+    # ------------------------------
+    # Skip Poor Matches
+    # ------------------------------
+
+    if decision["decision"] == "REJECT":
+
+        print(
+            "Skipping application generation."
+        )
+
+        continue
+
+
+
+    # ------------------------------
+    # Generate Application Package
+    # ------------------------------
 
     package = generate_application(
         resume,
@@ -100,40 +131,43 @@ for job in jobs:
     )
 
 
-    print("\nApplication Package Generated")
+    print(
+        "\nApplication Package Generated"
+    )
 
 
 
-    # -------------------------
-    # Save Result
-    # -------------------------
+    # ------------------------------
+    # Store Results
+    # ------------------------------
 
     results.append(
         {
             "job": job_info,
-            "analysis": analysis
+            "analysis": analysis,
+            "decision": decision
         }
     )
 
 
 
-    # -------------------------
+    # ------------------------------
     # Track Application
-    # -------------------------
+    # ------------------------------
 
     add_application(
         company=job_info["company"],
         role=job_info["role"],
         status="Review",
-        match_score="Pending",
-        notes="Generated application package"
+        match_score=decision["match_score"],
+        notes=decision["reason"]
     )
 
 
 
-# -------------------------
-# Complete
-# -------------------------
+# ==============================
+# Completion
+# ==============================
 
 print("\n==============================")
 print("PROCESS COMPLETE")
