@@ -123,3 +123,63 @@ def get_applications():
 
 
     return applications
+
+def update_application_status(
+    company,
+    role,
+    new_status
+):
+
+    if not os.path.exists(APPLICATION_FILE):
+        return False
+
+
+    applications = []
+
+
+    with open(
+        APPLICATION_FILE,
+        "r",
+        encoding="utf-8"
+    ) as file:
+
+        reader = csv.DictReader(file)
+
+        for row in reader:
+
+            if (
+                row["company"].lower().strip() == company.lower().strip()
+                and row["role"].lower().strip() == role.lower().strip()
+            ):
+
+                row["status"] = new_status
+
+            applications.append(row)
+
+
+
+    with open(
+        APPLICATION_FILE,
+        "w",
+        newline="",
+        encoding="utf-8"
+    ) as file:
+
+        writer = csv.DictWriter(
+            file,
+            fieldnames=[
+                "company",
+                "role",
+                "date_applied",
+                "status",
+                "match_score",
+                "notes"
+            ]
+        )
+
+        writer.writeheader()
+
+        writer.writerows(applications)
+
+
+    return True
